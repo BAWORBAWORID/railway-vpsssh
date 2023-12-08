@@ -13,7 +13,7 @@ RUN mkdir /run/sshd
 RUN echo '/usr/sbin/sshd -D' >>/1.sh
 RUN echo 'PermitRootLogin yes' >>  /etc/ssh/sshd_config 
 RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
-RUN echo root:${Password}|chpasswd
+RUN echo root:2ZGmzuQl8aUVhWE5r1PJZpmNuFR_2bF88nBdkLD65FvXHZwYF|chpasswd
 RUN service ssh start
 RUN chmod 755 /1.sh
 EXPOSE 80 8888 8080 443 5130 5131 5132 5133 5134 5135 3306
