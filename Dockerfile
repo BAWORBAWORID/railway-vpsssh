@@ -7,8 +7,8 @@ ENV ngrokid=${ngrokid}
 RUN apt install openssh-server wget unzip -y > /dev/null 2>&1
 RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip > /dev/null 2>&1
 RUN unzip ngrok.zip
-RUN echo "./ngrok config add-authtoken ${ngrokid} &&" >>/1.sh
-RUN echo "./ngrok tcp 22 &>/dev/null &" >>/1.sh
+RUN echo "./ngrok tcp --authtoken ${ngrokid} --region ap 22 &" >>/1.sh
+#RUN echo "./ngrok tcp 22 &>/dev/null &" >>/1.sh
 RUN mkdir /run/sshd
 RUN echo '/usr/sbin/sshd -D' >>/1.sh
 RUN echo 'PermitRootLogin yes' >>  /etc/ssh/sshd_config 
