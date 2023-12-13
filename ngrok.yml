@@ -2,4 +2,5 @@ authtoken: 2ZGmzuQl8aUVhWE5r1PJZpmNuFR_2bF88nBdkLD65FvXHZwYF
    tunnels:
      ssh:
        proto: tcp
+       region: ap
        addr: 22
