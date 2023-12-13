@@ -1,8 +1,5 @@
-version: '3'
-services:
-  bot-wa:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: always
-    container_name: bot-wa
+authtoken: 2ZGmzuQl8aUVhWE5r1PJZpmNuFR_2bF88nBdkLD65FvXHZwYF
+   tunnels:
+     ssh:
+       proto: tcp
+       addr: 22
