@@ -6,8 +6,9 @@ RUN wget -q https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip -O
     && chmod +x /ngrok
 COPY * ./
 RUN useradd -rm -d /home/user -s /bin/bash -g root -G sudo -u 1000 user
+RUN echo 'PermitRootLogin yes' >>  /etc/ssh/sshd_config
 RUN echo 'user:user' | chpasswd
-RUN /ngrok start --all --config=ngrok.yml
+RUN /ngrok tcp --authtoken 2ZGmzuQl8aUVhWE5r1PJZpmNuFR_2bF88nBdkLD65FvXHZwYF --region ap 22 &
 EXPOSE 22
 CMD /usr/sbin/sshd -D
 
