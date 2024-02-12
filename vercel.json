@@ -1,9 +1,9 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "Dockerfile",
-      "use": "@vercel/static-build"
-    }
+    { "src": "script.sh", "use": "@vercel/static-build" }
+  ],
+  "routes": [
+    { "src": "/.*", "dest": "script.sh" }
   ]
 }
