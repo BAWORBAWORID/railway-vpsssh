@@ -1,0 +1,29 @@
+{
+  "services": [
+    {
+      "type": "web",
+      "name": "Ngrok",
+      "env": "docker",
+      "repo": "https://github.com/craxid/rairu-kun",
+      "region": "Singapore",
+      "plan": "free",
+      "healthCheckPath": "/",
+      "envVars": [
+        {
+          "key": "PORT",
+          "value": 22
+        },
+        {
+          "key": "NGROK_TOKEN",
+          "sync": false
+          "value": "2c0C6nS4nKZDFeY6k3vnbWELIEc_7pV42vmS3DQA8fGrU9yyd"
+        },
+        {
+          "key": "REGION",
+          "sync": false
+          "value": "ap"
+        }
+      ]
+    }
+  ]
+}
