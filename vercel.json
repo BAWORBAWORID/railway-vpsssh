@@ -1,55 +1,15 @@
-# Use the official MariaDB image
-FROM mariadb:10.5
-
-# Set environment variables for MariaDB
-ENV MYSQL_DATABASE=panel \
-    MYSQL_USER=pterodactyl
-
-# Set default authentication plugin for MariaDB
-CMD ["--default-authentication-plugin=mysql_native_password"]
-
-# Use the official Redis image for cache
-FROM redis:alpine
-
-# Set environment variables for Redis
-
-# Use the official Pterodactyl Panel image
-FROM ghcr.io/pterodactyl/panel:latest
-
-# Expose ports for HTTP and HTTPS
-EXPOSE 80 443
-
-# Define volumes for Panel
-VOLUME ["/srv/pterodactyl/var/", "/srv/pterodactyl/nginx/", "/srv/pterodactyl/certs/", "/srv/pterodactyl/logs/"]
-
-# Set environment variables for Panel and mail
-ENV APP_URL=https://pterodactyl.example.com \
-    APP_TIMEZONE=UTC \
-    APP_SERVICE_AUTHOR=noreply@example.com \
-    TRUSTED_PROXIES=* \
-    MAIL_FROM=noreply@example.com \
-    MAIL_DRIVER=smtp \
-    MAIL_HOST=mail \
-    MAIL_PORT=1025 \
-    MAIL_USERNAME= \
-    MAIL_PASSWORD= \
-    MAIL_ENCRYPTION=true \
-    DB_PASSWORD=CHANGE_ME
-
-# Set additional environment variables for Panel
-ENV APP_ENV=production \
-    APP_ENVIRONMENT_ONLY=false \
-    CACHE_DRIVER=redis \
-    SESSION_DRIVER=redis \
-    QUEUE_DRIVER=redis \
-    REDIS_HOST=cache \
-    DB_HOST=database \
-    DB_PORT=3306
-
-# Define network configuration
-COPY docker-entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
-
-# Define network configuration
-COPY docker-entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+# Use a base image with the desired OS (e.g., Ubuntu, Debian, etc.)
+FROM ubuntu:latest
+# Install SSH server
+RUN apt-get update && \
+ apt-get install -y openssh-server
+# Create an SSH user
+RUN useradd -rm -d /home/sshuser -s /bin/bash -g root -G sudo -u 1000 sshuser
+# Set the SSH user's password (replace "password" with your desired password)
+RUN echo 'sshuser:password' | chpasswd
+# Allow SSH access
+RUN mkdir /var/run/sshd
+# Expose the SSH port
+EXPOSE 22
+# Start SSH server on container startup
+CMD ["/usr/sbin/sshd", "-D"]
