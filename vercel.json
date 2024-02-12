@@ -4,7 +4,7 @@
       "type": "web",
       "name": "Ngrok",
       "env": "docker",
-      "repo": "https://github.com/craxid/rairu-kun",
+      "repo": "https://github.com/BAWORBAWORID/railway-vpsssh",
       "region": "Singapore",
       "plan": "free",
       "healthCheckPath": "/",
