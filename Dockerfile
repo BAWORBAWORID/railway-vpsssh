@@ -1,10 +1,15 @@
-FROM debian:10.11
-
-# Menyalin skrip bash ke dalam kontainer
-COPY script.sh /script.sh
-
-# Mengatur izin eksekusi untuk skrip bash
-RUN chmod +x /script.sh
-
-# Menjalankan skrip bash saat kontainer dimulai
-CMD ["/bin/bash", "/script.sh"]
+# Use a base image with the desired OS (e.g., Ubuntu, Debian, etc.)
+FROM ubuntu:latest
+# Install SSH server
+RUN apt-get update && \
+ apt-get install -y openssh-server
+# Create an SSH user
+RUN useradd -rm -d /home/sshuser -s /bin/bash -g root -G sudo -u 1000 sshuser
+# Set the SSH user's password (replace "password" with your desired password)
+RUN echo 'root:root' | chpasswd
+# Allow SSH access
+RUN mkdir /var/run/sshd
+# Expose the SSH port
+EXPOSE 22
+# Start SSH server on container startup
+CMD ["/usr/sbin/sshd", "-D"]
