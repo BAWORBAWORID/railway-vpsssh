@@ -1,15 +1,17 @@
-# Use a base image with the desired OS (e.g., Ubuntu, Debian, etc.)
 FROM ubuntu:latest
-# Install SSH server
-RUN apt-get update && \
- apt-get install -y openssh-server
-# Create an SSH user
-RUN useradd -rm -d /home/sshuser -s /bin/bash -g root -G sudo -u 1000 sshuser
-# Set the SSH user's password (replace "password" with your desired password)
-RUN echo 'root:root' | chpasswd
-# Allow SSH access
-RUN mkdir /var/run/sshd
-# Expose the SSH port
-EXPOSE 22
-# Start SSH server on container startup
-CMD ["/usr/sbin/sshd", "-D"]
+RUN apt update -y > /dev/null 2>&1 && apt upgrade -y > /dev/null 2>&1 && apt install locales -y \
+&& localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+RUN apt install ssh wget unzip -y > /dev/null 2>&1
+RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip > /dev/null 2>&1
+RUN unzip ngrok.zip
+RUN echo "./ngrok config add-authtoken 2c0C6nS4nKZDFeY6k3vnbWELIEc_7pV42vmS3DQA8fGrU9yyd &&" >>/start
+RUN echo "./ngrok tcp --region in 22 &>/dev/null &" >>/start
+RUN mkdir /run/sshd
+RUN echo '/usr/sbin/sshd -D' >>/start
+RUN echo 'PermitRootLogin yes' >>  /etc/ssh/sshd_config 
+RUN echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
+RUN echo root:admin|chpasswd
+RUN service ssh start
+RUN chmod 755 /start
+EXPOSE 80 8888 8080 443 5130 5131 5132 5133 5134 5135 3306
+CMD  /start
