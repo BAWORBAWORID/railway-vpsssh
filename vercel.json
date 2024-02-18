@@ -1,6 +1,15 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "Dockerfile", "use": "@vercel/docker" }
-  ]
+  "functions": {
+    "my-gotty": {
+      "image": {
+        "docker": {
+          "file": "docker-compose.yml",
+          "service": "mygotty"
+        }
+      },
+      "port": 8989,
+      "memory": 50000
+    }
+  }
 }
