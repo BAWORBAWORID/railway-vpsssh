@@ -7,10 +7,11 @@ RUN apt update -y && apt upgrade -y && \
     apt install -y ssh wget curl sudo iproute2 && \
     apt clean
 
-# Download & install frpc
+# Download & install frp (frpc + frps)
 RUN wget -q https://github.com/fatedier/frp/releases/download/v0.61.0/frp_0.61.0_linux_amd64.tar.gz && \
     tar -xzf frp_0.61.0_linux_amd64.tar.gz && \
     mv frp_0.61.0_linux_amd64/frpc /usr/local/bin/frpc && \
+    mv frp_0.61.0_linux_amd64/frps /usr/local/bin/frps && \
     rm -rf frp_0.61.0_linux_amd64*
 
 # SSH config
@@ -24,7 +25,7 @@ RUN mkdir -p /run/sshd && \
 RUN cat <<'EOF' > /start.sh
 #!/bin/bash
 
-# Auto detect public IP (coba beberapa provider)
+# Auto detect public IP
 echo "[*] Detecting public IP..."
 PUBLIC_IP=""
 for url in \
@@ -35,24 +36,30 @@ for url in \
     "https://ipecho.net/plain"; do
     PUBLIC_IP=$(curl -s --max-time 5 "$url" 2>/dev/null | tr -d '[:space:]')
     if [[ $PUBLIC_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        echo "[*] Got IP from $url: $PUBLIC_IP"
+        echo "[*] Public IP: $PUBLIC_IP"
         break
     fi
 done
 
-# Fallback ke gateway IP kalau semua gagal
+# Fallback ke gateway
 if [[ -z "$PUBLIC_IP" ]]; then
     PUBLIC_IP=$(ip route | awk '/default/ {print $3}' | head -1)
-    echo "[!] Fallback to gateway IP: $PUBLIC_IP"
+    echo "[!] Fallback IP: $PUBLIC_IP"
 fi
 
 FRP_PORT="${FRP_PORT:-7000}"
 REMOTE_PORT="${REMOTE_PORT:-6022}"
 
-# Generate frpc config pakai IP yang terdeteksi
 mkdir -p /etc/frp
+
+# Generate frps config
+cat > /etc/frp/frps.toml <<CONF
+bindPort = $FRP_PORT
+CONF
+
+# Generate frpc config
 cat > /etc/frp/frpc.toml <<CONF
-serverAddr = "$PUBLIC_IP"
+serverAddr = "127.0.0.1"
 serverPort = $FRP_PORT
 
 [[proxies]]
@@ -63,8 +70,10 @@ localPort = 22
 remotePort = $REMOTE_PORT
 CONF
 
-echo "[*] frpc.toml:"
-cat /etc/frp/frpc.toml
+# Start frps dulu
+echo "[*] Starting frps..."
+frps -c /etc/frp/frps.toml &
+sleep 2
 
 # Start SSH
 echo "[*] Starting SSH..."
@@ -88,6 +97,6 @@ EOF
 
 RUN chmod +x /start.sh
 
-EXPOSE 22
+EXPOSE 22 7000 6022
 
 CMD ["/start.sh"]
