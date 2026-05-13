@@ -1,65 +1,73 @@
 FROM ubuntu:latest
 
-RUN apt update -y > /dev/null 2>&1 && apt upgrade -y > /dev/null 2>&1
-RUN apt install -y ssh wget curl > /dev/null 2>&1
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Download frpc
+# Install dependencies
+RUN apt update -y && apt upgrade -y && \
+    apt install -y ssh wget curl sudo && \
+    apt clean
+
+# Download & install frpc
 RUN wget -q https://github.com/fatedier/frp/releases/download/v0.61.0/frp_0.61.0_linux_amd64.tar.gz && \
     tar -xzf frp_0.61.0_linux_amd64.tar.gz && \
     mv frp_0.61.0_linux_amd64/frpc /usr/local/bin/frpc && \
     rm -rf frp_0.61.0_linux_amd64*
 
-RUN mkdir -p /etc/frp
-
 # SSH config
-RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
+RUN mkdir -p /run/sshd && \
+    echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config && \
     echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config && \
+    echo 'Port 22' >> /etc/ssh/sshd_config && \
     echo root:admin | chpasswd
 
-# Start script - auto detect public IP
-RUN cat <<'EOF' > /start
+# Buat start script
+RUN cat <<'EOF' > /start.sh
 #!/bin/bash
 
-# Auto get public IP
-PUBLIC_IP=$(curl -s https://api.ipify.org || \
-            curl -s https://ifconfig.me || \
-            curl -s https://icanhazip.com)
+FRP_SERVER="${FRP_SERVER:-IP_VPS_KAMU}"
+FRP_PORT="${FRP_PORT:-7000}"
+REMOTE_PORT="${REMOTE_PORT:-6022}"
 
-echo "[*] Public IP: $PUBLIC_IP"
+echo "[*] FRP Server : $FRP_SERVER"
+echo "[*] Remote Port: $REMOTE_PORT"
 
-# Generate frpc.toml dynamically
-cat > /etc/frp/frpc.toml <<FRPCONF
-serverAddr = "$PUBLIC_IP"
-serverPort = 7000
+# Generate frpc config
+mkdir -p /etc/frp
+cat > /etc/frp/frpc.toml <<CONF
+serverAddr = "$FRP_SERVER"
+serverPort = $FRP_PORT
 
 [[proxies]]
-name = "ssh-docker"
+name = "ssh"
 type = "tcp"
 localIP = "127.0.0.1"
 localPort = 22
-remotePort = 6022
-FRPCONF
+remotePort = $REMOTE_PORT
+CONF
 
-echo "[*] frpc.toml generated:"
-cat /etc/frp/frpc.toml
+# Start SSH daemon
+echo "[*] Starting SSH..."
+/usr/sbin/sshd
 
+# Start frpc
 echo "[*] Starting frpc..."
 frpc -c /etc/frp/frpc.toml &
 
-sleep 2
+echo ""
+echo "================================"
+echo " SSH Login Info"
+echo " Host : $FRP_SERVER"
+echo " Port : $REMOTE_PORT"
+echo " User : root"
+echo " Pass : admin"
+echo "================================"
 
-echo "[*] SSH Info:"
-echo "    Host : $PUBLIC_IP"
-echo "    Port : 6022"
-echo "    User : root"
-echo "    Pass : admin"
-
-echo "[*] Starting sshd..."
-/usr/sbin/sshd -D
+# Keep container alive
+tail -f /dev/null
 EOF
 
-RUN chmod +x /start
+RUN chmod +x /start.sh
 
-EXPOSE 22 80 443 8080 8888 3306 5130 5131 5132 5133 5134 5135
+EXPOSE 22
 
-CMD ["/start"]
+CMD ["/start.sh"]
