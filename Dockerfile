@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt update -y && apt upgrade -y && \
-    apt install -y ssh wget curl sudo && \
+    apt install -y ssh wget curl sudo iproute2 && \
     apt clean
 
 # Download & install frpc
@@ -20,21 +20,39 @@ RUN mkdir -p /run/sshd && \
     echo 'Port 22' >> /etc/ssh/sshd_config && \
     echo root:admin | chpasswd
 
-# Buat start script
+# Start script
 RUN cat <<'EOF' > /start.sh
 #!/bin/bash
 
-FRP_SERVER="${FRP_SERVER:-IP_VPS_KAMU}"
+# Auto detect public IP (coba beberapa provider)
+echo "[*] Detecting public IP..."
+PUBLIC_IP=""
+for url in \
+    "https://api.ipify.org" \
+    "https://ifconfig.me" \
+    "https://icanhazip.com" \
+    "https://checkip.amazonaws.com" \
+    "https://ipecho.net/plain"; do
+    PUBLIC_IP=$(curl -s --max-time 5 "$url" 2>/dev/null | tr -d '[:space:]')
+    if [[ $PUBLIC_IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo "[*] Got IP from $url: $PUBLIC_IP"
+        break
+    fi
+done
+
+# Fallback ke gateway IP kalau semua gagal
+if [[ -z "$PUBLIC_IP" ]]; then
+    PUBLIC_IP=$(ip route | awk '/default/ {print $3}' | head -1)
+    echo "[!] Fallback to gateway IP: $PUBLIC_IP"
+fi
+
 FRP_PORT="${FRP_PORT:-7000}"
 REMOTE_PORT="${REMOTE_PORT:-6022}"
 
-echo "[*] FRP Server : $FRP_SERVER"
-echo "[*] Remote Port: $REMOTE_PORT"
-
-# Generate frpc config
+# Generate frpc config pakai IP yang terdeteksi
 mkdir -p /etc/frp
 cat > /etc/frp/frpc.toml <<CONF
-serverAddr = "$FRP_SERVER"
+serverAddr = "$PUBLIC_IP"
 serverPort = $FRP_PORT
 
 [[proxies]]
@@ -45,7 +63,10 @@ localPort = 22
 remotePort = $REMOTE_PORT
 CONF
 
-# Start SSH daemon
+echo "[*] frpc.toml:"
+cat /etc/frp/frpc.toml
+
+# Start SSH
 echo "[*] Starting SSH..."
 /usr/sbin/sshd
 
@@ -56,13 +77,12 @@ frpc -c /etc/frp/frpc.toml &
 echo ""
 echo "================================"
 echo " SSH Login Info"
-echo " Host : $FRP_SERVER"
+echo " Host : $PUBLIC_IP"
 echo " Port : $REMOTE_PORT"
 echo " User : root"
 echo " Pass : admin"
 echo "================================"
 
-# Keep container alive
 tail -f /dev/null
 EOF
 
