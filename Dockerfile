@@ -1,4 +1,6 @@
 FROM debian:stable
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt update -y > /dev/null 2>&1 && apt upgrade -y > /dev/null 2>&1
 
 RUN apt install openssh-server wget unzip -y > /dev/null 2>&1
