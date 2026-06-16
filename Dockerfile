@@ -1,6 +1,6 @@
- FROM debian:12
+ FROM debian:13
 
-ARG NGROK_TOKEN=2hpd7vLD4dsHkneSyXph7oQ74gf_4uBMWmAJw17Tk3Ytq71gw
+#ARG NGROK_TOKEN=2hpd7vLD4dsHkneSyXph7oQ74gf_4uBMWmAJw17Tk3Ytq71gw
 ENV REGION=us
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -32,8 +32,8 @@ RUN cat > /start.sh << 'EOF'
 echo "Starting Ngrok..."
 
 ngrok tcp \
-  --authtoken "${NGROK_TOKEN}" \
-  --region "${REGION}" \
+  --authtoken "2hpd7vLD4dsHkneSyXph7oQ74gf_4uBMWmAJw17Tk3Ytq71gw" \
+  #--region "${REGION}" \
   22 > /dev/null 2>&1 &
 
 sleep 8
