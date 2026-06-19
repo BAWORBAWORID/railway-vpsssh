@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM debian:13
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update -y > /dev/null 2>&1 && apt upgrade -y > /dev/null 2>&1
@@ -6,7 +6,7 @@ RUN apt update -y > /dev/null 2>&1 && apt upgrade -y > /dev/null 2>&1
 RUN apt install openssh-server wget unzip -y > /dev/null 2>&1
 RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip > /dev/null 2>&1
 RUN unzip ngrok.zip
-RUN echo "./ngrok config add-authtoken 2hpd7vLD4dsHkneSyXph7oQ74gf_4uBMWmAJw17Tk3Ytq71gw &&" >>/1.sh
+RUN echo "./ngrok config add-authtoken 3FLS6W6nOkw0bMsNcTFzfRiD3oM_7zLjtXURAiUWTzD4QpZyX &&" >>/1.sh
 RUN echo "./ngrok tcp 22 &>/dev/null &" >>/1.sh
 #RUN mkdir "/run/sshd"
 RUN echo '/usr/sbin/sshd -D' >>/1.sh
