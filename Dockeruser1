@@ -1,0 +1,39 @@
+FROM debian:13
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Jakarta
+
+LABEL maintainer="alwayscodex"
+
+WORKDIR /root
+
+RUN apt update -y && \
+    apt upgrade -y && \
+    apt install -y locales curl wget unzip openssh-server gnupg lsb-release && \
+    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
+# Install cloudflared
+RUN mkdir -p --mode=0755 /usr/share/keyrings && \
+    curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg \
+    -o /usr/share/keyrings/cloudflare-public-v2.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main" \
+    > /etc/apt/sources.list.d/cloudflared.list && \
+    apt update && \
+    apt install -y cloudflared
+
+# SSH Configuration
+RUN mkdir -p /run/sshd
+
+RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+RUN echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
+
+RUN echo root:root | chpasswd
+
+# RUN cloudflared service install eyJhIjoiZWE1NjQ5MjNiMWJhYmZlODk1NmY1Y2UxOTNjNjRjYTkiLCJ0IjoiOTc1NDkwODgtNDQ4MC00NWI2LTg4MjgtZjAyMWFlOTRkOGFhIiwicyI6Ik56UXdZV05tWkdRdFpUa3dOaTAwTnpjMkxXRTFNVGN0WVRsbFpEVXpOVGczWmpoaSJ9
+RUN service ssh start
+RUN 
+
+EXPOSE 22 80 443 8080 8888 3306
+CMD ["/bin/bash", "-c", "/usr/sbin/sshd && while true; do cloudflared tunnel run --token eyJhIjoiOWJmYzgyNDQ2YmNlZWEwMzUxMWYzNmM1ZDY5NTFlNGEiLCJ0IjoiZTA3ZWUxZTktYzQxZi00Y2JmLTljZDAtZmViNzcwODk1YzcyIiwicyI6Ik5qbGhaR0V4TkdZdE5tRmlOQzAwWkdObExUaGxOalF0Tm1abFpqVmhabUU0TVdOaCJ9; echo Restarting Cloudflared...; sleep 5; done"]
+
+#CMD ["/usr/sbin/sshd -D"]
