@@ -29,10 +29,11 @@ RUN echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
 
 RUN echo root:root | chpasswd
 
-RUN cloudflared service install eyJhIjoiZWE1NjQ5MjNiMWJhYmZlODk1NmY1Y2UxOTNjNjRjYTkiLCJ0IjoiOTc1NDkwODgtNDQ4MC00NWI2LTg4MjgtZjAyMWFlOTRkOGFhIiwicyI6Ik56UXdZV05tWkdRdFpUa3dOaTAwTnpjMkxXRTFNVGN0WVRsbFpEVXpOVGczWmpoaSJ9
+# RUN cloudflared service install eyJhIjoiZWE1NjQ5MjNiMWJhYmZlODk1NmY1Y2UxOTNjNjRjYTkiLCJ0IjoiOTc1NDkwODgtNDQ4MC00NWI2LTg4MjgtZjAyMWFlOTRkOGFhIiwicyI6Ik56UXdZV05tWkdRdFpUa3dOaTAwTnpjMkxXRTFNVGN0WVRsbFpEVXpOVGczWmpoaSJ9
 RUN service ssh start
 RUN 
 
 EXPOSE 22 80 443 8080 8888 3306
+CMD ["/bin/bash", "-c", "/usr/sbin/sshd && while true; do cloudflared tunnel run --token eyJhIjoiZWE1NjQ5MjNiMWJhYmZlODk1NmY1Y2UxOTNjNjRjYTkiLCJ0IjoiOTc1NDkwODgtNDQ4MC00NWI2LTg4MjgtZjAyMWFlOTRkOGFhIiwicyI6Ik56UXdZV05tWkdRdFpUa3dOaTAwTnpjMkxXRTFNVGN0WVRsbFpEVXpOVGczWmpoaSJ9; echo Restarting Cloudflared...; sleep 5; done"]
 
-CMD ["/usr/sbin/sshd -D"]
+#CMD ["/usr/sbin/sshd -D"]
