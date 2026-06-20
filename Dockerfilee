@@ -14,7 +14,7 @@ RUN apt install openssh-server wget unzip -y > /dev/null 2>&1
 RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip > /dev/null 2>&1
 RUN unzip ngrok.zip
 
-RUN echo "./ngrok config add-authtoken 3FLS6W6nOkw0bMsNcTFzfRiD3oM_7zLjtXURAiUWTzD4QpZyX &&" >> /root/1.sh
+RUN echo "./ngrok config add-authtoken 3FNdqy0Ki4L6kLHuN2MG7qemj1J_35kAnMKKibhgu2kQFQDEG &&" >> /root/1.sh
 RUN echo "./ngrok tcp 22 &>/dev/null &" >> /root/1.sh
 #RUN mkdir "/run/sshd"
 RUN echo '/usr/sbin/sshd -D' >> /root/1.sh
