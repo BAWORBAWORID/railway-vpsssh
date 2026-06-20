@@ -29,19 +29,10 @@ RUN echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
 
 RUN echo root:root | chpasswd
 
-# Startup Script
-RUN cat > /root/start.sh << 'EOF'
-#!/bin/bash
-
-service ssh start
-
-cloudflared service install eyJhIjoiZWE1NjQ5MjNiMWJhYmZlODk1NmY1Y2UxOTNjNjRjYTkiLCJ0IjoiOTc1NDkwODgtNDQ4MC00NWI2LTg4MjgtZjAyMWFlOTRkOGFhIiwicyI6Ik56UXdZV05tWkdRdFpUa3dOaTAwTnpjMkxXRTFNVGN0WVRsbFpEVXpOVGczWmpoaSJ9
-
-/usr/sbin/sshd -D
-EOF
-
-RUN chmod +x /root/start.sh
+RUN cloudflared service install eyJhIjoiZWE1NjQ5MjNiMWJhYmZlODk1NmY1Y2UxOTNjNjRjYTkiLCJ0IjoiOTc1NDkwODgtNDQ4MC00NWI2LTg4MjgtZjAyMWFlOTRkOGFhIiwicyI6Ik56UXdZV05tWkdRdFpUa3dOaTAwTnpjMkxXRTFNVGN0WVRsbFpEVXpOVGczWmpoaSJ9
+RUN service ssh start
+RUN 
 
 EXPOSE 22 80 443 8080 8888 3306
 
-CMD ["/root/start.sh"]
+CMD ["/usr/sbin/sshd -D"]
