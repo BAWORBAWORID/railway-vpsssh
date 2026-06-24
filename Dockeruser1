@@ -7,33 +7,26 @@ LABEL maintainer="alwayscodex"
 
 WORKDIR /root
 
-RUN apt update -y && \
-    apt upgrade -y && \
-    apt install -y locales curl wget unzip openssh-server gnupg lsb-release && \
-    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+RUN apt update -y && 
+apt upgrade -y && 
+apt install -y locales curl wget openssh-server tar && 
+localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
-# Install cloudflared
-RUN mkdir -p --mode=0755 /usr/share/keyrings && \
-    curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg \
-    -o /usr/share/keyrings/cloudflare-public-v2.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main" \
-    > /etc/apt/sources.list.d/cloudflared.list && \
-    apt update && \
-    apt install -y cloudflared
+Install Bore
 
-# SSH Configuration
-RUN mkdir -p /run/sshd
+RUN wget -O bore.tar.gz https://github.com/ekzhang/bore/releases/download/v0.6.0/bore-v0.6.0-x86_64-unknown-linux-musl.tar.gz && 
+tar -xzf bore.tar.gz && 
+chmod +x bore && 
+mv bore /usr/local/bin/bore && 
+rm -f bore.tar.gz
 
-RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
-RUN echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config
+SSH Configuration
 
-RUN echo root:root | chpasswd
-
-# RUN cloudflared service install eyJhIjoiZWE1NjQ5MjNiMWJhYmZlODk1NmY1Y2UxOTNjNjRjYTkiLCJ0IjoiOTc1NDkwODgtNDQ4MC00NWI2LTg4MjgtZjAyMWFlOTRkOGFhIiwicyI6Ik56UXdZV05tWkdRdFpUa3dOaTAwTnpjMkxXRTFNVGN0WVRsbFpEVXpOVGczWmpoaSJ9
-RUN service ssh start
-RUN 
+RUN mkdir -p /run/sshd && 
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && 
+echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && 
+echo "root:root" | chpasswd
 
 EXPOSE 22 80 443 8080 8888 3306
-CMD ["/bin/bash", "-c", "/usr/sbin/sshd && while true; do cloudflared tunnel run --token eyJhIjoiZWE1NjQ5MjNiMWJhYmZlODk1NmY1Y2UxOTNjNjRjYTkiLCJ0IjoiYjM2MGQ0MjItNzkzZC00NWViLWI1NGMtNTUyYWY2YWUyMzFjIiwicyI6Ik9UVmhOalV4TmpFdE1qVTJOUzAwTWpJMExXRmxZakF0TmpBeVpXRXlNemcxTmpkaiJ9; echo Restarting Cloudflared...; sleep 5; done"]
 
-#CMD ["/usr/sbin/sshd -D"]
+CMD ["/bin/bash", "-c", "/usr/sbin/sshd -D & bore local 22 --to bore.pub"]
