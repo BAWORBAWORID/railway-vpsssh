@@ -8,7 +8,6 @@ RUN apt-get update -y && apt-get install -y \
     sudo \
     nano \
     htop \
-    neofetch \
     && rm -rf /var/lib/apt/lists/*
     
 #RUN apt install openssh-server wget unzip -y > /dev/null 2>&1
