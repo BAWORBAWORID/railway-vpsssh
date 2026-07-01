@@ -17,7 +17,7 @@ RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/
     sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/' /etc/ssh/sshd_config
 
 #COPY  /script.sh
-RUN chmod +x /script.sh
+RUN chmod 755 /script.sh
 
 #RUN echo root:root|chpasswd
 ##RUN service ssh start
