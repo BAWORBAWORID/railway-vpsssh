@@ -3,7 +3,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 #RUN apt update -y > /dev/null 2>&1 && apt upgrade -y > /dev/null 2>&1
 
-RUN apt-get update -y && apt-get upgrade && apt-get install -y \
+RUN apt-get update -y && apt-get install -y \
     openssh-server \
     sudo \
     nano \
