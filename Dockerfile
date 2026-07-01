@@ -16,7 +16,7 @@ RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/
     sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
     sed -i 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/' /etc/ssh/sshd_config
 
-COPY entrypoint.sh /script.sh
+#COPY  /script.sh
 RUN chmod +x /script.sh
 
 #RUN echo root:root|chpasswd
