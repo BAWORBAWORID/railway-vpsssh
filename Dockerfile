@@ -22,6 +22,6 @@ RUN chmod +x /script.sh
 #RUN echo root:root|chpasswd
 ##RUN service ssh start
 RUN chmod 755 /1.sh
-EXPOSE 2280 8888 8080 443 5130 5131 5132 5133 5134 5135 3306
+EXPOSE 22 80 8888 8080 443 5130 5131 5132 5133 5134 5135 3306
 
 CMD ["/script.sh"]
